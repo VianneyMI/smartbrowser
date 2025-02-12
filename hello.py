@@ -5,6 +5,7 @@ import asyncio
 from dotenv import load_dotenv
 import gradio as gr
 from browser_use import Agent, Browser, BrowserConfig
+from browser_use.browser.browser import BrowserContext, BrowserContextConfig
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -20,6 +21,11 @@ def get_llm():
 
 def create_agent(task:str, llm:BaseChatModel)->Agent:
     """Creates an agent."""
+
+    browser_context_config = BrowserContextConfig(
+        
+    )
+    browser_context = BrowserContext()
 
     browser = Browser(
         config = BrowserConfig(
