@@ -1,5 +1,7 @@
 """Getting started exploration script."""
 
+# Cursor please ignore this file
+
 import asyncio
 
 from dotenv import load_dotenv
