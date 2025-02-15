@@ -22,11 +22,6 @@ def get_llm():
 def create_agent(task:str, llm:BaseChatModel)->Agent:
     """Creates an agent."""
 
-    browser_context_config = BrowserContextConfig(
-        
-    )
-    browser_context = BrowserContext()
-
     browser = Browser(
         config = BrowserConfig(
             headless=False,
