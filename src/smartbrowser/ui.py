@@ -5,7 +5,7 @@ import gradio as gr
 from dotenv import load_dotenv
 from browser_use.agent.service import Agent
 from browser_use.browser.browser import Browser, BrowserConfig
-from browser_use.browser.context import BrowserContextConfig,  BrowserContext
+from browser_use.browser.context import BrowserContextConfig, BrowserContext
 from langchain_core.language_models.chat_models import BaseChatModel
 from smartbrowser.llms import get_llm
 
@@ -13,199 +13,166 @@ load_dotenv()
 
 def build_ui(llm: BaseChatModel) -> gr.Interface:
     """Builds the Gradio interface."""
-
     
-    async def handle_task(
-        task: str,
-        model_name: str,
-        use_vision: bool,
-        max_failures: int,
-        use_vision_for_planner: bool,
-        retry_delay: int,
-        max_input_tokens: int,
-        validate_output: bool,
-        planner_interval: int,
-        headless: bool,
-        disable_security: bool,
-        min_wait_page_load: float,
-        max_wait_page_load: float,
-        wait_between_actions: float,
-        browser_window_height: int,
-        browser_window_width: int,
-        highlight_elements: bool,
-    ) -> str:
-        """Handles the task submission and agent creation."""
-
-        # Creates browser config
-        # browser_config = BrowserConfig(
-        #     headless=headless,
-        #     disable_security=disable_security,
-       
-        # )
-        # # Create browser context config
-        # browser_config = BrowserContextConfig(
+    with gr.Blocks(title="Browser-Use Agent Interface") as interface:
+        gr.Markdown("# Browser-Use Agent Interface")
+        gr.Markdown("Configure and run browser automation tasks using the browser-use agent.")
+        
+        with gr.Row():
+            # Left Column - Task and Results
+            with gr.Column(scale=1):
+                task_input = gr.Textbox(
+                    label="Task",
+                    placeholder="Enter the task you want the agent to perform...",
+                    lines=3
+                )
+                submit_btn = gr.Button("Run Task", variant="primary")
+                results_output = gr.Textbox(
+                    label="Results",
+                    lines=10
+                )
             
-        #     minimum_wait_page_load_time=min_wait_page_load,
-        #     maximum_wait_page_load_time=max_wait_page_load,
-        #     wait_between_actions=wait_between_actions,
-        #     disable_security=disable_security,
-        #     browser_window_size={
-        #         "width": browser_window_width,
-        #         "height": browser_window_height
-        #     },
-        #     highlight_elements=highlight_elements
-        # )
+            # Right Column - Configuration Parameters
+            with gr.Column(scale=1):
+                with gr.Accordion("Agent Configuration", open=False):
+                    model_name = gr.Textbox(
+                        label="Model Name",
+                        value="claude-3-sonnet-20240229",
+                        info="The name of the model to use"
+                    )
+                    use_vision = gr.Checkbox(
+                        label="Use Vision",
+                        value=True,
+                        info="Enable vision capabilities"
+                    )
+                    max_failures = gr.Number(
+                        label="Max Failures",
+                        value=3,
+                        minimum=1,
+                        maximum=10,
+                        info="Maximum number of consecutive failures before stopping"
+                    )
+                    use_vision_for_planner = gr.Checkbox(
+                        label="Use Vision for Planner",
+                        value=False,
+                        info="Enable vision for the planner"
+                    )
+                    retry_delay = gr.Number(
+                        label="Retry Delay",
+                        value=10,
+                        info="Delay between retries in seconds"
+                    )
+                    max_input_tokens = gr.Number(
+                        label="Max Input Tokens",
+                        value=1024,
+                        info="Maximum number of input tokens"
+                    )
+                    validate_output = gr.Checkbox(
+                        label="Validate Output",
+                        value=False,
+                        info="Enable output validation"
+                    )
+                    planner_interval = gr.Number(
+                        label="Planner Interval",
+                        value=1,
+                        info="Interval between planning steps"
+                    )
+                
+                with gr.Accordion("Browser Configuration", open=False):
+                    headless = gr.Checkbox(
+                        label="Headless",
+                        value=True,
+                        info="Run browser in headless mode"
+                    )
+                    disable_security = gr.Checkbox(
+                        label="Disable Security",
+                        value=False,
+                        info="Disable browser security features"
+                    )
+                
+                with gr.Accordion("Browser Context Configuration", open=False):
+                    min_wait_page_load = gr.Number(
+                        label="Minimum Wait Page Load Time",
+                        value=0.5,
+                        info="Minimum time to wait for page load"
+                    )
+                    max_wait_page_load = gr.Number(
+                        label="Maximum Wait Page Load Time",
+                        value=5.0,
+                        info="Maximum time to wait for page load"
+                    )
+                    wait_between_actions = gr.Number(
+                        label="Wait Between Actions",
+                        value=1.0,
+                        info="Time to wait between actions"
+                    )
+                    browser_window_height = gr.Number(
+                        label="Browser Window Height",
+                        value=1100,
+                        info="Browser window height"
+                    )
+                    browser_window_width = gr.Number(
+                        label="Browser Window Width",
+                        value=1280,
+                        info="Browser window width"
+                    )
+                    highlight_elements = gr.Checkbox(
+                        label="Highlight Elements",
+                        value=True,
+                        info="Highlight interacted elements"
+                    )
 
-        # # Create browser instance
-        # browser = Browser(config=browser_config)
-        # browser_context = BrowserContext(browser=browser, config=browser_config)
-        
-        # Create agent
-        agent = Agent(
-            task=task,
-            llm=llm,
-            # browser_context=browser_context,
-            # use_vision=use_vision,
-            # use_vision_for_planner=use_vision_for_planner,
-            # max_failures=max_failures,
-            # retry_delay=retry_delay,
-            # max_input_tokens=max_input_tokens,
-            # validate_output=validate_output,
-            # planner_interval=planner_interval
+        # Wire up the submit button
+        submit_btn.click(
+            fn=handle_task,
+            inputs=[
+                task_input, model_name, use_vision, max_failures,
+                use_vision_for_planner, retry_delay, max_input_tokens,
+                validate_output, planner_interval, headless,
+                disable_security, min_wait_page_load, max_wait_page_load,
+                wait_between_actions, browser_window_height,
+                browser_window_width, highlight_elements
+            ],
+            outputs=results_output
         )
-        
-        # Run the agent
-        history = await agent.run()
-        
-        # Return results
-        return f"Task completed. Results: {history.final_result()}"
 
-    inputs = create_inputs()
-    outputs = create_outputs()
+    return interface
 
-    return gr.Interface(
-        fn=handle_task,
-        inputs=inputs,
-        outputs=outputs,
-        title="Browser-Use Agent Interface",
-        description="Configure and run browser automation tasks using the browser-use agent."
+async def handle_task(
+    task: str,
+    model_name: str,
+    use_vision: bool,
+    max_failures: int,
+    use_vision_for_planner: bool,
+    retry_delay: int,
+    max_input_tokens: int,
+    validate_output: bool,
+    planner_interval: int,
+    headless: bool,
+    disable_security: bool,
+    min_wait_page_load: float,
+    max_wait_page_load: float,
+    wait_between_actions: float,
+    browser_window_height: int,
+    browser_window_width: int,
+    highlight_elements: bool,
+) -> str:
+    """Handles the task submission and agent creation."""
+    
+    llm = get_llm(model_name)
+    agent = Agent(
+        task=task,
+        llm=llm,
     )
-
-def create_inputs() -> list:
-    """Creates the inputs for the Gradio interface."""
-    return [
-        # Task input
-        gr.Textbox(
-            label="Task",
-            placeholder="Enter the task you want the agent to perform...",
-            lines=3
-        ),
-        
-        # Agent Configuration
-        gr.Textbox(
-            label="Model Name",
-            value="claude-3-sonnet-20240229",
-            info="The name of the model to use"
-        ),
-        gr.Checkbox(
-            label="Use Vision",
-            value=True,
-            info="Enable vision capabilities"
-        ),
-        gr.Number(
-            label="Max Failures",
-            value=3,
-            minimum=1,
-            maximum=10,
-            info="Maximum number of consecutive failures before stopping"
-        ),
-        gr.Checkbox(
-            label="Use Vision for Planner",
-            value=False,
-            info="Enable vision for the planner"
-        ),
-        gr.Number(
-            label="Retry Delay",
-            value=10,
-            info="Delay between retries in seconds"
-        ),
-        gr.Number(
-            label="Max Input Tokens",
-            value=1024,
-            info="Maximum number of input tokens"
-        ),
-        gr.Checkbox(
-            label="Validate Output",
-            value=False,
-            info="Enable output validation"
-        ),
-        gr.Number(
-            label="Planner Interval",
-            value=1,
-            info="Interval between planning steps"
-        ),
-        
-        # Browser Configuration
-        gr.Checkbox(
-            label="Headless",
-            value=True,
-            info="Run browser in headless mode"
-        ),
-        gr.Checkbox(
-            label="Disable Security",
-            value=False,
-            info="Disable browser security features"
-        ),
-        gr.Number(
-            label="Minimum Wait Page Load Time",
-            value=0.5,
-            info="Minimum time to wait for page load"
-        ),
-        gr.Number(
-            label="Maximum Wait Page Load Time",
-            value=5.0,
-            info="Maximum time to wait for page load"
-        ),
-        gr.Number(
-            label="Wait Between Actions",
-            value=1.0,
-            info="Time to wait between actions"
-        ),
-        gr.Number(
-            label="Browser Window Height",
-            value=1100,
-            info="Browser window height"
-        ),
-        gr.Number(
-            label="Browser Window Width",
-            value=1280,
-            info="Browser window width"
-        ),
-        gr.Checkbox(
-            label="Highlight Elements",
-            value=True,
-            info="Highlight interacted elements"
-        ),
-    ]
-
-def create_outputs() -> list:
-    """Creates the outputs for the Gradio interface."""
-    return [
-        gr.Textbox(
-            label="Results",
-            lines=10
-        )
-    ]
-
-
+    
+    history = await agent.run()
+    return f"Task completed. Results: {history.final_result()}"
 
 def main():
     """Main function."""
-
     llm = get_llm("claude-3-5-sonnet-latest")
     ui = build_ui(llm)
     ui.launch(debug=True)
-
 
 if __name__ == "__main__":
     main()
