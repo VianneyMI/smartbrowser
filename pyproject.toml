@@ -9,3 +9,8 @@ dependencies = [
     "gradio>=5.16.0",
     "langchain-ollama>=0.2.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+]
