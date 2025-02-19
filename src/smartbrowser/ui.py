@@ -37,7 +37,7 @@ def build_ui(llm: BaseChatModel) -> gr.Interface:
                 with gr.Accordion("Agent Configuration", open=False):
                     model_name = gr.Textbox(
                         label="Model Name",
-                        value="claude-3-sonnet-20240229",
+                        value="claude-3-5-sonnet-latest",
                         info="The name of the model to use"
                     )
                     use_vision = gr.Checkbox(
