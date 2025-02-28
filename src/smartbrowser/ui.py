@@ -79,6 +79,12 @@ def build_ui(llm: BaseChatModel) -> gr.Interface:
                     )
                 
                 with gr.Accordion("Browser Configuration", open=False):
+                    chrome_path = gr.File(
+                        label="Chrome Executable Path",
+                        file_types=[".exe"],
+                        type="filepath",
+                        #info="Path to Chrome executable (optional)"
+                    )
                     headless = gr.Checkbox(
                         label="Headless",
                         value=True,
@@ -128,7 +134,7 @@ def build_ui(llm: BaseChatModel) -> gr.Interface:
             inputs=[
                 task_input, model_name, use_vision, max_failures,
                 use_vision_for_planner, retry_delay, max_input_tokens,
-                validate_output, planner_interval, headless,
+                validate_output, planner_interval, chrome_path, headless,
                 disable_security, min_wait_page_load, max_wait_page_load,
                 wait_between_actions, browser_window_height,
                 browser_window_width, highlight_elements
@@ -148,6 +154,7 @@ async def handle_task(
     max_input_tokens: int,
     validate_output: bool,
     planner_interval: int,
+    chrome_path: str | None,
     headless: bool,
     disable_security: bool,
     min_wait_page_load: float,
@@ -160,9 +167,32 @@ async def handle_task(
     """Handles the task submission and agent creation."""
     
     llm = get_llm(model_name)
+    
+    # Create browser config
+    browser_config = BrowserConfig(
+        headless=headless,
+        disable_security=disable_security,
+        chrome_instance_path=chrome_path.name if chrome_path else None
+    )
+    
+    # Create browser context config
+    context_config = BrowserContextConfig(
+        # min_wait_page_load=min_wait_page_load,
+        # max_wait_page_load=max_wait_page_load,
+        # wait_between_actions=wait_between_actions,
+        # browser_window_height=browser_window_height,
+        # browser_window_width=browser_window_width,
+        # highlight_elements=highlight_elements
+    )
+    
+    # Create browser and context
+    browser = Browser(config=browser_config)
+    context = BrowserContext(browser=browser, config=context_config)
+    
     agent = Agent(
         task=task,
         llm=llm,
+        browser_context=context
     )
     
     history = await agent.run()
