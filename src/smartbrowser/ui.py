@@ -1,5 +1,6 @@
 """Defines the Gradio interface."""
 
+from pathlib import Path
 from typing import Callable
 import gradio as gr
 from dotenv import load_dotenv
@@ -11,12 +12,19 @@ from smartbrowser.llms import get_llm
 
 load_dotenv()
 
-def build_ui(llm: BaseChatModel) -> gr.Interface:
+TITLE = "Browser-Use Agent Interface"
+DESCRIPTION = "Configure and run browser automation tasks using the browser-use agent."
+
+class UIBuilder:
+    def __init__(self):
+        self.interface:gr.Blocks|None = None
+
+def build_ui(self) -> gr.Interface:
     """Builds the Gradio interface."""
-    
-    with gr.Blocks(title="Browser-Use Agent Interface") as interface:
-        gr.Markdown("# Browser-Use Agent Interface")
-        gr.Markdown("Configure and run browser automation tasks using the browser-use agent.")
+
+    with gr.Blocks(title=TITLE) as interface:
+        gr.Markdown(f"# {TITLE}")
+        gr.Markdown(DESCRIPTION)
         
         with gr.Row():
             # Left Column - Task and Results
@@ -172,7 +180,8 @@ async def handle_task(
     browser_config = BrowserConfig(
         headless=headless,
         disable_security=disable_security,
-        chrome_instance_path=chrome_path.name if chrome_path else None
+        chrome_instance_path=Path("C:\Program Files\Google\Chrome\Application") / "chrome.exe"
+        #chrome_path.name if chrome_path else None
     )
     
     # Create browser context config
