@@ -25,19 +25,22 @@ class UIBuilder:
         description: str = DESCRIPTION,
         handler: Callable | None = None,
     ) -> None:
+        self.title = title
+        self.description = description
         self.handler = handler
-        self.inputs = {}
-        self.outputs = None
-        self.submit: gr.Button | None = None
+        self.inputs: dict[str, gr.Component] = {}
+        self.outputs: gr.Component | None = None
+        self.submit: gr.Button = None  # type: ignore
 
         with gr.Blocks(title=title) as interface:
             self.interface = interface
-            self.add_title_and_description(title, description)
 
     def build(self) -> gr.Interface:
         """Builds the Gradio interface."""
 
         with self.interface:
+            self.add_title()
+            self.add_description()
             with gr.Row():
                 with gr.Column(scale=1):
                     self.add_task_input()
@@ -57,10 +60,15 @@ class UIBuilder:
 
         return self.interface
 
-    def add_title_and_description(self, title: str, description: str) -> None:
-        """Adds the title and description to the interface."""
-        gr.Markdown(f"# {title}")
-        gr.Markdown(description)
+    def add_title(self) -> gr.Markdown:
+        """Adds the title to the interface."""
+
+        return gr.Markdown(f"# {self.title}")
+
+    def add_description(self) -> gr.Markdown:
+        """Adds the description to the interface."""
+
+        return gr.Markdown(self.description)
 
     def add_task_input(self) -> gr.Textbox:
         """Adds the task input to the left column."""
@@ -70,7 +78,7 @@ class UIBuilder:
             placeholder="Enter the task you want the agent to perform...",
             lines=3,
         )
-        self.inputs["task"] = task_input
+        self.inputs[1] = task_input
         return task_input
 
     def add_submit_button(self) -> gr.Button:
@@ -130,14 +138,14 @@ class UIBuilder:
                 info="Interval between planning steps",
             )
 
-        self.inputs["model_name"] = model_name
-        self.inputs["use_vision"] = use_vision
-        self.inputs["max_failures"] = max_failures
-        self.inputs["use_vision_for_planner"] = use_vision_for_planner
-        self.inputs["retry_delay"] = retry_delay
-        self.inputs["max_input_tokens"] = max_input_tokens
-        self.inputs["validate_output"] = validate_output
-        self.inputs["planner_interval"] = planner_interval
+        self.inputs[2] = model_name
+        self.inputs[3] = use_vision
+        self.inputs[4] = max_failures
+        self.inputs[5] = use_vision_for_planner
+        self.inputs[6] = retry_delay
+        self.inputs[7] = max_input_tokens
+        self.inputs[8] = validate_output
+        self.inputs[9] = planner_interval
 
         return agent_configuration_accordion
 
@@ -162,9 +170,9 @@ class UIBuilder:
                 info="Disable browser security features",
             )
 
-        self.inputs["chrome_path"] = chrome_path
-        self.inputs["headless"] = headless
-        self.inputs["disable_security"] = disable_security
+        self.inputs[10] = chrome_path
+        self.inputs[11] = headless
+        self.inputs[12] = disable_security
 
         return browser_configuration_accordion
 
@@ -201,12 +209,12 @@ class UIBuilder:
                 info="Highlight interacted elements",
             )
 
-        self.inputs["min_wait_page_load"] = min_wait_page_load
-        self.inputs["max_wait_page_load"] = max_wait_page_load
-        self.inputs["wait_between_actions"] = wait_between_actions
-        self.inputs["browser_window_height"] = browser_window_height
-        self.inputs["browser_window_width"] = browser_window_width
-        self.inputs["highlight_elements"] = highlight_elements
+        self.inputs[13] = min_wait_page_load
+        self.inputs[14] = max_wait_page_load
+        self.inputs[15] = wait_between_actions
+        self.inputs[16] = browser_window_height
+        self.inputs[17] = browser_window_width
+        self.inputs[18] = highlight_elements
 
         return browser_context_configuration_accordion
 
@@ -411,7 +419,7 @@ def main():
     """Main function."""
     llm = get_llm("claude-3-5-sonnet-latest")
     # ui = build_ui(llm)
-    ui = UIBuilder().build()
+    ui = UIBuilder(handler=handle_task).build()
     ui.launch(debug=True)
 
 
