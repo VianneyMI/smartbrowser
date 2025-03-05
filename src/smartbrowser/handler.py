@@ -30,14 +30,17 @@ async def handle_task(
 ) -> str:
     """Handles the task submission and agent creation."""
 
+    print(type(chrome_path))
+    print(chrome_path)
+    # print(chrome_path.)
+
     llm = get_llm(model_name)
 
     # Create browser config
     browser_config = BrowserConfig(
         headless=headless,
         disable_security=disable_security,
-        chrome_instance_path=Path("C:\Program Files\Google\Chrome\Application")
-        / "chrome.exe",
+        chrome_instance_path=chrome_path,
         # chrome_path.name if chrome_path else None
     )
 
