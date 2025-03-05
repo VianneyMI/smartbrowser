@@ -3,14 +3,14 @@
 Basically, it is used to launch the script.
 """
 
-from smartbrowser.handler import work, dummy_work
-from smartbrowser.ui import build_ui
+from smartbrowser.handler import handle_task
+from smartbrowser.ui import UIBuilder
 
 
-def main()->None:
-    """Launches the application."""
+def main():
+    """Main function."""
 
-    ui = build_ui(work)
+    ui = UIBuilder(handler=handle_task).build()
     ui.launch(debug=True)
 
 
