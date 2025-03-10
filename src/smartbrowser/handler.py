@@ -30,18 +30,14 @@ async def handle_task(
 ) -> str:
     """Handles the task submission and agent creation."""
 
-    print(type(chrome_path))
-    print(chrome_path)
-    # print(chrome_path.)
-
-    llm = get_llm(model_name)
+    llm = get_llm(model_name)  # TODO : How to handle unknown model names ?
+    # => Limit model_name in frontend using a dropdown list.
 
     # Create browser config
     browser_config = BrowserConfig(
         headless=headless,
         disable_security=disable_security,
         chrome_instance_path=chrome_path,
-        # chrome_path.name if chrome_path else None
     )
 
     # Create browser context config

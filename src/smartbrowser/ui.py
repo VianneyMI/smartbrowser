@@ -1,14 +1,8 @@
 """Defines the Gradio interface."""
 
-from pathlib import Path
 from typing import Callable
 import gradio as gr
 from dotenv import load_dotenv
-from browser_use.agent.service import Agent
-from browser_use.browser.browser import Browser, BrowserConfig
-from browser_use.browser.context import BrowserContextConfig, BrowserContext
-from langchain_core.language_models.chat_models import BaseChatModel
-from smartbrowser.llms import get_llm
 
 load_dotenv()
 
@@ -155,10 +149,10 @@ class UIBuilder:
         with gr.Accordion(
             "Browser Configuration", open=False
         ) as browser_configuration_accordion:
-            chrome_path = gr.File(
-                label="Chrome Executable Path",
-                file_types=[".exe"],
-                type="filepath",
+            chrome_path = gr.Text(
+                label="Enter path to Chrome executable",
+                # file_types=[".exe"],
+                # type="filepath",
                 # info="Path to Chrome executable (optional)"
             )
             headless = gr.Checkbox(
