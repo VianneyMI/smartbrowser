@@ -1,4 +1,7 @@
-"""Defines the Gradio interface."""
+"""`smartbrowser.ui` module.
+Defines a Gradio interface to configure and run browser automation tasks using the browser-use agent.
+
+"""
 
 from typing import Callable
 import gradio as gr
@@ -11,7 +14,10 @@ DESCRIPTION = "Configure and run browser automation tasks using the browser-use 
 
 
 class UIBuilder:
-    """Builds the Gradio interface."""
+    """`smartbrowser.ui.UIBuilder` class.
+
+    Gathers all the components of the UI and builds the Gradio interface.
+    """
 
     def __init__(
         self,

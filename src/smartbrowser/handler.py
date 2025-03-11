@@ -1,6 +1,7 @@
-"""Communication layer between the UI and the Browser Use."""
+"""`smartbrowser.handler` module.
+Communication layer between the UI and the Browser Use.
 
-from pathlib import Path
+"""
 
 from browser_use import Agent, Browser, BrowserConfig
 from browser_use.browser.browser import BrowserContext, BrowserContextConfig

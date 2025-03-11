@@ -1,4 +1,7 @@
-"""Interface to LLM providers."""
+"""`smartbrowser.llms` module.
+
+Interface to LLM providers.
+"""
 
 from typing import Literal, get_args
 

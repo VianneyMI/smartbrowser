@@ -1,4 +1,4 @@
-"""`smartbrowser.main`
+"""`smartbrowser.main` module.
 Entry point of the Gradio and Browser Use powered SmartBrowser.
 Used to launch the app.
 """
