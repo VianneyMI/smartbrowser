@@ -1,8 +1,40 @@
 # smartbrowser
 
-Interface to Browser Use to launch a bot on a task quickly
+SmartBrowser is a User Interface that makes it easier for non-technical users to launch an AI Agent that can perform tasks on the web by using a browser like a human.
+It is powered by the [browser-use](https://github.com/browser-use/browser-use) library.
 
 ## Description
+
+SmartBrowser is simply an interface, a web page built with [Gradio](https://www.gradio.app/).
+
+It looks like the below:
+
+![SmartBrowser Interface](./docs/screenshots/overview.png)
+
+
+## Installation
+
+
+
+
+
+## Usage
+
+### Quickstart
+
+1. Describe your task in natural language in the Task text area.
+2. Select the model you want to use from the Agent Configuration dropdown menu.
+3. Click on run the task to launch the agent. This will open Google Chrome and the agent will start to perform the task.
+
+
+### Advanced Usage
+
+
+
+
+
+
+## Technical Details
 
 The goal of this project is to create a simple interface to launch a bot on a task quickly. 
 The interface will be a web page built with Gradio.
