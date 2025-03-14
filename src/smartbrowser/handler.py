@@ -3,6 +3,7 @@ Communication layer between the UI and the Browser Use.
 
 """
 
+from pathlib import Path
 from browser_use import Agent, Browser, BrowserConfig
 from browser_use.browser.browser import BrowserContext, BrowserContextConfig
 
@@ -65,6 +66,7 @@ async def handle_task(
         retry_delay=retry_delay,
         max_input_tokens=max_input_tokens,
         use_vision=use_vision,
+        save_conversation_path=Path(__file__).parents[2] / ".logs",
         use_vision_for_planner=use_vision_for_planner,
         validate_output=validate_output,
         planner_interval=planner_interval,

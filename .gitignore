@@ -21,6 +21,7 @@ venv.bak/
 .cache
 *.cover
 *.log
+*.logs
 *.pot
 *.pyc
 *.pyo
