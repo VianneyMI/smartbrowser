@@ -3,9 +3,10 @@ Defines a Gradio interface to configure and run browser automation tasks using t
 
 """
 
-from typing import Callable
+from typing import Callable, get_args
 import gradio as gr
 from dotenv import load_dotenv
+from smartbrowser.llms import all_models_literal
 
 load_dotenv()
 
@@ -28,7 +29,7 @@ class UIBuilder:
         self.title = title
         self.description = description
         self.handler = handler
-        self.inputs: dict[str, gr.Component] = {}
+        self.inputs: dict[int, gr.Component] = {}
         self.outputs: gr.Component | None = None
         self.submit: gr.Button = None  # type: ignore
 
@@ -101,8 +102,9 @@ class UIBuilder:
         with gr.Accordion(
             "Agent Configuration", open=False
         ) as agent_configuration_accordion:
-            model_name = gr.Textbox(
+            model_name = gr.Dropdown(
                 label="Model Name",
+                choices=list(get_args(all_models_literal)),
                 value="claude-3-5-sonnet-latest",
                 info="The name of the model to use",
             )
@@ -157,12 +159,9 @@ class UIBuilder:
         ) as browser_configuration_accordion:
             chrome_path = gr.Text(
                 label="Enter path to Chrome executable",
-                # file_types=[".exe"],
-                # type="filepath",
-                # info="Path to Chrome executable (optional)"
             )
             headless = gr.Checkbox(
-                label="Headless", value=True, info="Run browser in headless mode"
+                label="Headless", value=False, info="Run browser in headless mode"
             )
             disable_security = gr.Checkbox(
                 label="Disable Security",

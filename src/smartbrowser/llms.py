@@ -12,12 +12,27 @@ from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 
 # TODO : Complete the list of the models.
-google_models_literal = Literal["gemini-2.0-flash"]  # to be completed
-anthropic_models_literal = Literal["claude-3-5-sonnet-latest"]  # to be completed
-openai_models_literal = Literal["gpt-4o-mini"]  # to be completed
+google_models_literal = Literal[
+    "gemini-2.0-flash", "gemini-2.0-flash-lite"
+]  # to be completed
+anthropic_models_literal = Literal[
+    "claude-3-7-sonnet-latest", "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest"
+]  # to be completed
+openai_models_literal = Literal[
+    "gpt-4o-mini", "gpt-4o", "o3-mini", "o1-mini"
+]  # to be completed
 ollama_models_literal = Literal["llama3.2:latest"]  # to be completed
 all_models_literal = Literal[
-    "gemini-2.0-flash", "claude-3-5-sonnet-latest", "gpt-4o-mini", "llama3.2:latest"
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+    "claude-3-7-sonnet-latest",
+    "claude-3-5-haiku-latest",
+    "claude-3-5-sonnet-latest",
+    "gpt-4o-mini",
+    "gpt-4o",
+    "o3-mini",
+    "o1-mini",
+    "llama3.2:latest",
 ]
 
 
