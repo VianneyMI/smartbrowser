@@ -102,9 +102,15 @@ class UIBuilder:
         with gr.Accordion(
             "Agent Configuration", open=False
         ) as agent_configuration_accordion:
+            api_key = gr.Text(
+                label="Enter your API key",
+            )
+
             model_name = gr.Dropdown(
                 label="Model Name",
-                choices=list(get_args(all_models_literal)),
+                choices=list(
+                    get_args(all_models_literal)
+                ),  # TODO : Change order of models - Use a custom order and group models by provider
                 value="claude-3-5-sonnet-latest",
                 info="The name of the model to use",
             )
@@ -148,6 +154,8 @@ class UIBuilder:
         self.inputs[7] = max_input_tokens
         self.inputs[8] = validate_output
         self.inputs[9] = planner_interval
+        # TODO : Fix handling of inputs and reorder this
+        self.inputs[19] = api_key
 
         return agent_configuration_accordion
 

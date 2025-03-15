@@ -29,10 +29,11 @@ async def handle_task(
     browser_window_height: int,
     browser_window_width: int,
     highlight_elements: bool,
+    api_key: str,
 ) -> str:
     """Handles the task submission and agent creation."""
 
-    llm = get_llm(model_name)  # TODO : How to handle unknown model names ?
+    llm = get_llm(model_name, api_key)  # TODO : How to handle unknown model names ?
     # => Limit model_name in frontend using a dropdown list.
 
     # Create browser config
