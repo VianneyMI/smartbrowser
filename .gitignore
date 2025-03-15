@@ -4,6 +4,10 @@ __pycache__/
 *.py[cod]
 
 # Distribution / packaging
+build/
+dist/
+main.spec
+
 .Python
 env/
 venv/
