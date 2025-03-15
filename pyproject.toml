@@ -8,6 +8,7 @@ dependencies = [
     "browser-use>=0.1.36",
     "gradio>=5.16.0",
     "langchain-ollama>=0.2.2",
+    # Add missing langchain subpackages
 ]
 
 [dependency-groups]
