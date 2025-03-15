@@ -5,12 +5,12 @@ It is powered by the [browser-use](https://github.com/browser-use/browser-use) l
 
 ## Description
 
-SmartBrowser is simply an interface, a web page built with [Gradio](https://www.gradio.app/).
+SmartBrowser is simply a web page built with [Gradio](https://www.gradio.app/) that serves as a simple interface to browser-use.
+It allows you to quickly launch an agent to perform a task on the web.
 
 It looks like the below:
 
-![SmartBrowser Interface](./docs/screenshots/overview.png)
-
+<img src="./docs/screenshots/overview.png" alt="SmartBrowser Interface" width="800"/>
 
 ## Installation
 
@@ -30,7 +30,7 @@ It looks like the below:
 ### Advanced Usage
 
 
-
+## Examples
 
 
 
