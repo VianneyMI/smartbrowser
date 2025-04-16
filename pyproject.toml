@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "browser-use>=0.1.36",
-    "gradio>=5.16.0",
+    "langchain-mistralai>=0.2.10",
     "langchain-ollama>=0.2.2",
     # Add missing langchain subpackages
 ]

@@ -1,10 +1,12 @@
 """`smartbrowser.ui` module.
-Defines a Gradio interface to configure and run browser automation tasks using the browser-use agent.
+Defines a Tkinter interface to configure and run browser automation tasks using the browser-use agent.
 
 """
 
+import asyncio
+import tkinter as tk
+from tkinter import ttk
 from typing import Callable, get_args
-import gradio as gr
 from dotenv import load_dotenv
 from smartbrowser.llms import all_models_literal
 
@@ -14,10 +16,40 @@ TITLE = "Browser-Use Agent Interface"
 DESCRIPTION = "Configure and run browser automation tasks using the browser-use agent."
 
 
+class CollapsibleFrame(ttk.Frame):
+    def __init__(self, parent, text="", *args, **kwargs):
+        ttk.Frame.__init__(self, parent, *args, **kwargs)
+
+        self.show = tk.BooleanVar(value=False)
+        self.title_frame = ttk.Frame(self)
+        self.title_frame.pack(fill="x", expand=1)
+
+        ttk.Label(self.title_frame, text=text).pack(side="left", fill="x", expand=1)
+        self.toggle_button = ttk.Checkbutton(
+            self.title_frame,
+            width=2,
+            text="+",
+            command=self.toggle,
+            variable=self.show,
+            style="Toolbutton",
+        )
+        self.toggle_button.pack(side="left")
+
+        self.sub_frame = ttk.Frame(self)
+
+    def toggle(self):
+        if self.show.get():
+            self.sub_frame.pack(fill="x", expand=1)
+            self.toggle_button.configure(text="-")
+        else:
+            self.sub_frame.forget()
+            self.toggle_button.configure(text="+")
+
+
 class UIBuilder:
     """`smartbrowser.ui.UIBuilder` class.
 
-    Gathers all the components of the UI and builds the Gradio interface.
+    Gathers all the components of the UI and builds the Tkinter interface.
     """
 
     def __init__(
@@ -29,198 +61,246 @@ class UIBuilder:
         self.title = title
         self.description = description
         self.handler = handler
-        self.inputs: dict[int, gr.Component] = {}
-        self.outputs: gr.Component | None = None
-        self.submit: gr.Button = None  # type: ignore
+        self.inputs = {}
+        self.root = tk.Tk()
+        self.root.title(title)
+        self.root.geometry("1000x800")  # Larger default size
+        self.root.minsize(800, 600)  # Minimum size
 
-        with gr.Blocks(title=title) as interface:
-            self.interface = interface
+        # Configure style
+        style = ttk.Style()
+        style.configure("TButton", padding=6, relief="flat", background="#2196F3")
+        style.configure("TLabel", padding=6)
+        style.configure("TFrame", padding=6)
 
-    def build(self) -> gr.Interface:
-        """Builds the Gradio interface."""
+        # Create main container
+        self.main_frame = ttk.Frame(self.root, padding="10")
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
 
-        with self.interface:
-            self.add_title()
-            self.add_description()
-            with gr.Row():
-                with gr.Column(scale=1):
-                    self.add_task_input()
-                    self.add_submit_button()
-                    self.add_results_output()
+        # Create left and right columns
+        self.left_frame = ttk.Frame(self.main_frame)
+        self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
 
-                with gr.Column(scale=1):
-                    self.add_agent_configuration()
-                    self.add_browser_configuration()
-                    self.add_browser_context_configuration()
+        self.right_frame = ttk.Frame(self.main_frame)
+        self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5)
 
-            self.submit.click(
-                fn=self.handler,
-                inputs=list(self.inputs.values()),
-                outputs=self.outputs,
-            )
+    def build(self) -> tk.Tk:
+        """Builds the Tkinter interface."""
+        self.add_title()
+        self.add_description()
+        self.add_task_input()
+        self.add_submit_button()
+        self.add_results_output()
+        self.add_agent_configuration()
+        self.add_browser_configuration()
+        self.add_browser_context_configuration()
+        return self.root
 
-        return self.interface
-
-    def add_title(self) -> gr.Markdown:
+    def add_title(self) -> None:
         """Adds the title to the interface."""
-
-        return gr.Markdown(f"# {self.title}")
-
-    def add_description(self) -> gr.Markdown:
-        """Adds the description to the interface."""
-
-        return gr.Markdown(self.description)
-
-    def add_task_input(self) -> gr.Textbox:
-        """Adds the task input to the left column."""
-
-        task_input = gr.Textbox(
-            label="Task",
-            placeholder="Enter the task you want the agent to perform...",
-            lines=3,
+        title_label = ttk.Label(
+            self.left_frame, text=self.title, font=("Helvetica", 16, "bold")
         )
-        self.inputs[1] = task_input
-        return task_input
+        title_label.pack(pady=10)
 
-    def add_submit_button(self) -> gr.Button:
+    def add_description(self) -> None:
+        """Adds the description to the interface."""
+        desc_label = ttk.Label(self.left_frame, text=self.description, wraplength=350)
+        desc_label.pack(pady=5)
+
+    def add_task_input(self) -> None:
+        """Adds the task input to the left column."""
+        task_frame = ttk.LabelFrame(self.left_frame, text="Task")
+        task_frame.pack(fill=tk.X, pady=5)
+
+        # Add scrollbar to text widget
+        scrollbar = ttk.Scrollbar(task_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.task_input = tk.Text(task_frame, height=3, width=40, wrap=tk.WORD)
+        self.task_input.pack(fill=tk.X, padx=5, pady=5)
+        self.task_input.config(yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.task_input.yview)
+
+        self.inputs[1] = self.task_input
+
+    def add_submit_button(self) -> None:
         """Adds the submit button to the left column."""
+        self.submit = ttk.Button(
+            self.left_frame, text="Run Task", command=self._on_submit
+        )
+        self.submit.pack(pady=10)
 
-        submit_btn = gr.Button("Run Task", variant="primary")
-        self.submit = submit_btn
-        return submit_btn
-
-    def add_results_output(self) -> gr.Textbox:
+    def add_results_output(self) -> None:
         """Adds the results output to the left column."""
+        results_frame = ttk.LabelFrame(self.left_frame, text="Results")
+        results_frame.pack(fill=tk.BOTH, expand=True, pady=5)
 
-        results_output = gr.Textbox(label="Results", lines=10)
-        self.outputs = results_output
-        return results_output
+        # Add scrollbar to text widget
+        scrollbar = ttk.Scrollbar(results_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.results_output = tk.Text(results_frame, height=10, width=40, wrap=tk.WORD)
+        self.results_output.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.results_output.config(yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.results_output.yview)
+
+        self.outputs = self.results_output
 
     def add_agent_configuration(self) -> None:
         """Adds the agent configuration menu to the right column."""
+        agent_frame = CollapsibleFrame(self.right_frame, text="Agent Configuration")
+        agent_frame.pack(fill=tk.X, pady=5)
 
-        with gr.Accordion(
-            "Agent Configuration", open=False
-        ) as agent_configuration_accordion:
-            api_key = gr.Text(
-                label="Enter your API key",
-            )
-
-            model_name = gr.Dropdown(
-                label="Model Name",
-                choices=list(
-                    get_args(all_models_literal)
-                ),  # TODO : Change order of models - Use a custom order and group models by provider
-                value="claude-3-5-sonnet-latest",
-                info="The name of the model to use",
-            )
-            use_vision = gr.Checkbox(
-                label="Use Vision", value=True, info="Enable vision capabilities"
-            )
-            max_failures = gr.Number(
-                label="Max Failures",
-                value=3,
-                minimum=1,
-                maximum=10,
-                info="Maximum number of consecutive failures before stopping",
-            )
-            use_vision_for_planner = gr.Checkbox(
-                label="Use Vision for Planner",
-                value=False,
-                info="Enable vision for the planner",
-            )
-            retry_delay = gr.Number(
-                label="Retry Delay", value=10, info="Delay between retries in seconds"
-            )
-            max_input_tokens = gr.Number(
-                label="Max Input Tokens",
-                value=1024,
-                info="Maximum number of input tokens",
-            )
-            validate_output = gr.Checkbox(
-                label="Validate Output", value=False, info="Enable output validation"
-            )
-            planner_interval = gr.Number(
-                label="Planner Interval",
-                value=1,
-                info="Interval between planning steps",
-            )
-
-        self.inputs[2] = model_name
-        self.inputs[3] = use_vision
-        self.inputs[4] = max_failures
-        self.inputs[5] = use_vision_for_planner
-        self.inputs[6] = retry_delay
-        self.inputs[7] = max_input_tokens
-        self.inputs[8] = validate_output
-        self.inputs[9] = planner_interval
-        # TODO : Fix handling of inputs and reorder this
+        # API Key
+        ttk.Label(agent_frame.sub_frame, text="API Key:").pack(anchor="w")
+        api_key = ttk.Entry(agent_frame.sub_frame)
+        api_key.pack(fill=tk.X, padx=5, pady=2)
         self.inputs[19] = api_key
 
-        return agent_configuration_accordion
+        # Model Name
+        ttk.Label(agent_frame.sub_frame, text="Model Name:").pack(anchor="w")
+        model_name = ttk.Combobox(
+            agent_frame.sub_frame,
+            values=list(get_args(all_models_literal)),
+            state="readonly",
+        )
+        model_name.set("claude-3-5-sonnet-latest")
+        model_name.pack(fill=tk.X, padx=5, pady=2)
+        self.inputs[2] = model_name
 
-    def add_browser_configuration(self) -> gr.Accordion:
+        # Checkboxes
+        use_vision = tk.BooleanVar(value=True)
+        ttk.Checkbutton(
+            agent_frame.sub_frame, text="Use Vision", variable=use_vision
+        ).pack(anchor="w", padx=5, pady=2)
+        self.inputs[3] = use_vision
+
+        use_vision_for_planner = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            agent_frame.sub_frame,
+            text="Use Vision for Planner",
+            variable=use_vision_for_planner,
+        ).pack(anchor="w", padx=5, pady=2)
+        self.inputs[5] = use_vision_for_planner
+
+        validate_output = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            agent_frame.sub_frame, text="Validate Output", variable=validate_output
+        ).pack(anchor="w", padx=5, pady=2)
+        self.inputs[8] = validate_output
+
+        # Number inputs
+        self._add_number_input(agent_frame.sub_frame, "Max Failures", 3, 1, 10, 4)
+        self._add_number_input(agent_frame.sub_frame, "Retry Delay", 10, 0, 60, 6)
+        self._add_number_input(
+            agent_frame.sub_frame, "Max Input Tokens", 1024, 1, 4096, 7
+        )
+        self._add_number_input(agent_frame.sub_frame, "Planner Interval", 1, 0, 10, 9)
+
+    def add_browser_configuration(self) -> None:
         """Adds the browser configuration menu to the right column."""
+        browser_frame = CollapsibleFrame(self.right_frame, text="Browser Configuration")
+        browser_frame.pack(fill=tk.X, pady=5)
 
-        with gr.Accordion(
-            "Browser Configuration", open=False
-        ) as browser_configuration_accordion:
-            chrome_path = gr.Text(
-                label="Enter path to Chrome executable",
-            )
-            headless = gr.Checkbox(
-                label="Headless", value=False, info="Run browser in headless mode"
-            )
-            disable_security = gr.Checkbox(
-                label="Disable Security",
-                value=False,
-                info="Disable browser security features",
-            )
-
+        # Chrome Path
+        ttk.Label(browser_frame.sub_frame, text="Chrome Path:").pack(anchor="w")
+        chrome_path = ttk.Entry(browser_frame.sub_frame)
+        chrome_path.pack(fill=tk.X, padx=5, pady=2)
         self.inputs[10] = chrome_path
+
+        # Checkboxes
+        headless = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            browser_frame.sub_frame, text="Headless", variable=headless
+        ).pack(anchor="w", padx=5, pady=2)
         self.inputs[11] = headless
+
+        disable_security = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            browser_frame.sub_frame, text="Disable Security", variable=disable_security
+        ).pack(anchor="w", padx=5, pady=2)
         self.inputs[12] = disable_security
 
-        return browser_configuration_accordion
-
-    def add_browser_context_configuration(self) -> gr.Accordion:
+    def add_browser_context_configuration(self) -> None:
         """Adds the browser context configuration menu to the right column."""
+        context_frame = CollapsibleFrame(
+            self.right_frame, text="Browser Context Configuration"
+        )
+        context_frame.pack(fill=tk.X, pady=5)
 
-        with gr.Accordion(
-            "Browser Context Configuration", open=False
-        ) as browser_context_configuration_accordion:
-            min_wait_page_load = gr.Number(
-                label="Minimum Wait Page Load Time",
-                value=0.5,
-                info="Minimum time to wait for page load",
-            )
-            max_wait_page_load = gr.Number(
-                label="Maximum Wait Page Load Time",
-                value=5.0,
-                info="Maximum time to wait for page load",
-            )
-            wait_between_actions = gr.Number(
-                label="Wait Between Actions",
-                value=1.0,
-                info="Time to wait between actions",
-            )
-            browser_window_height = gr.Number(
-                label="Browser Window Height", value=1100, info="Browser window height"
-            )
-            browser_window_width = gr.Number(
-                label="Browser Window Width", value=1280, info="Browser window width"
-            )
-            highlight_elements = gr.Checkbox(
-                label="Highlight Elements",
-                value=True,
-                info="Highlight interacted elements",
-            )
+        # Number inputs
+        self._add_number_input(
+            context_frame.sub_frame, "Min Wait Page Load", 0.5, 0, 10, 13
+        )
+        self._add_number_input(
+            context_frame.sub_frame, "Max Wait Page Load", 5.0, 0, 30, 14
+        )
+        self._add_number_input(
+            context_frame.sub_frame, "Wait Between Actions", 1.0, 0, 10, 15
+        )
+        self._add_number_input(
+            context_frame.sub_frame, "Browser Window Height", 1100, 100, 2000, 16
+        )
+        self._add_number_input(
+            context_frame.sub_frame, "Browser Window Width", 1280, 100, 2000, 17
+        )
 
-        self.inputs[13] = min_wait_page_load
-        self.inputs[14] = max_wait_page_load
-        self.inputs[15] = wait_between_actions
-        self.inputs[16] = browser_window_height
-        self.inputs[17] = browser_window_width
+        # Checkbox
+        highlight_elements = tk.BooleanVar(value=True)
+        ttk.Checkbutton(
+            context_frame.sub_frame,
+            text="Highlight Elements",
+            variable=highlight_elements,
+        ).pack(anchor="w", padx=5, pady=2)
         self.inputs[18] = highlight_elements
 
-        return browser_context_configuration_accordion
+    def _add_number_input(self, parent, label, default, min_val, max_val, input_id):
+        """Helper method to add number input fields."""
+        frame = ttk.Frame(parent)
+        frame.pack(fill=tk.X, padx=5, pady=2)
+
+        ttk.Label(frame, text=f"{label}:").pack(side=tk.LEFT)
+
+        var = tk.DoubleVar(value=default)
+        spinbox = ttk.Spinbox(
+            frame,
+            from_=min_val,
+            to=max_val,
+            textvariable=var,
+            width=10,
+            format="%.2f",  # Format for decimal values
+        )
+        spinbox.pack(side=tk.RIGHT)
+        self.inputs[input_id] = var
+
+    def _on_submit(self):
+        """Handler for the submit button."""
+        if self.handler:
+            # Get values from inputs
+            input_values = []
+            for key in sorted(self.inputs.keys()):
+                widget = self.inputs[key]
+                if isinstance(widget, tk.Text):
+                    value = widget.get(
+                        "1.0", tk.END
+                    ).strip()  # Get all text from start to end
+                elif isinstance(widget, ttk.Entry):
+                    value = widget.get()
+                elif isinstance(widget, (tk.BooleanVar, tk.DoubleVar)):
+                    value = widget.get()
+                elif isinstance(widget, ttk.Combobox):
+                    value = widget.get()
+                else:
+                    value = widget
+                input_values.append(value)
+
+            # Call handler with inputs
+            result = asyncio.run(self.handler(*input_values))
+
+            # Update results output
+            self.results_output.delete(1.0, tk.END)
+            if result is not None:
+                self.results_output.insert(tk.END, str(result))
+            else:
+                self.results_output.insert(tk.END, "Task completed with no output.")
