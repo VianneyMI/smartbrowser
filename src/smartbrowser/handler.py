@@ -59,6 +59,9 @@ async def handle_task(
     browser = Browser(config=browser_config)
     context = BrowserContext(browser=browser, config=context_config)
 
+    # Convert Path to string for save_conversation_path
+    save_path = str(Path(__file__).parents[2] / ".logs")
+
     agent = Agent(
         task=task,
         llm=llm,
@@ -67,7 +70,7 @@ async def handle_task(
         retry_delay=retry_delay,
         max_input_tokens=max_input_tokens,
         use_vision=use_vision,
-        save_conversation_path=Path(__file__).parents[2] / ".logs",
+        save_conversation_path=save_path,
         use_vision_for_planner=use_vision_for_planner,
         validate_output=validate_output,
         planner_interval=planner_interval,
