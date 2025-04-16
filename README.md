@@ -78,3 +78,8 @@ The main parameters are:
     * The `save_recoring_path` parameter. It should default to `None`.
     * The `save_downloads_path` parameter. It should default to `None`.
     * The `highlight_elements` parameter. It should default to `True`.
+
+
+    pyinstaller --onefile --hidden-import=pydantic --hidden-import=pydantic-core --hidden-import=pydantic.deprecated.decorator --paths venv/Scripts/python.exe  src/smartbrowser/main.py
+
+    pyinstaller main.spec   

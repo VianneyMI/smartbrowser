@@ -1,12 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+from PyInstaller.utils.hooks import collect_data_files
+
+gradio_client_datas = collect_data_files('gradio_client')
+gradio_datas = collect_data_files('gradio')
 
 a = Analysis(
     ['src\\smartbrowser\\main.py'],
-    pathex=['venv/Scripts/python.exe'],
+    pathex=['venv/Scripts/Lib'],
     binaries=[],
-    datas=[],
-    hiddenimports=['pydantic', 'pydantic-core', 'pydantic.deprecated.decorator'],
+    datas=gradio_client_datas + gradio_datas,
+    hiddenimports=['pydantic', 'pydantic-core', 'pydantic.deprecated.decorator', 'gradio', 'gradio_client'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -15,8 +20,7 @@ a = Analysis(
     optimize=0,
     module_collection_mode={
         'gradio': 'py',  # Collect gradio package as source .py files
-    },
-    collect
+    }
 )
 pyz = PYZ(a.pure)
 
